@@ -994,10 +994,26 @@ pub struct CloudUniform {
     pub time: f32,
     pub time_start: f32,
     pub time_stop: f32,
+    pub bulge: f32,
     pub num_classes: u32,
     pub color_space: u32,
     pub min: Vec4,
     pub max: Vec4,
+    // per-particle transition phase (martin fork; appended after max — see bindings.wgsl)
+    pub transition_mode: u32,
+    pub transition_softness: f32,
+    pub transition_axis: u32,
+    pub _transition_pad: u32,
+    // persistent vertex deform (martin fork; appended after the transition group)
+    pub deform_mode: u32,
+    pub deform_amp: f32,
+    pub deform_freq: f32,
+    pub deform_time: f32,
+    // per-particle swarm detour during a morph (martin fork; a 16-byte tail block after deform)
+    pub swarm: f32,
+    pub _swarm_pad0: f32,
+    pub _swarm_pad1: f32,
+    pub _swarm_pad2: f32,
 }
 
 #[allow(clippy::type_complexity)]
@@ -1054,6 +1070,7 @@ pub fn extract_gaussians<R: PlanarSync>(
             time: settings.time,
             time_start: settings.time_start,
             time_stop: settings.time_stop,
+            bulge: settings.bulge,
             num_classes: settings.num_classes as u32,
             color_space: match settings.color_space {
                 GaussianColorSpace::SrgbRec709Display => 0,
@@ -1061,6 +1078,18 @@ pub fn extract_gaussians<R: PlanarSync>(
             },
             min: aabb.min().extend(1.0),
             max: aabb.max().extend(1.0),
+            transition_mode: settings.transition_mode,
+            transition_softness: settings.transition_softness,
+            transition_axis: settings.transition_axis,
+            _transition_pad: 0,
+            deform_mode: settings.deform_mode,
+            deform_amp: settings.deform_amp,
+            deform_freq: settings.deform_freq,
+            deform_time: settings.deform_time,
+            swarm: settings.swarm,
+            _swarm_pad0: 0.0,
+            _swarm_pad1: 0.0,
+            _swarm_pad2: 0.0,
         };
 
         commands_list.push((

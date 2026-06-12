@@ -221,7 +221,12 @@ impl AssetLoader for GaussianSceneLoader {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["gltf", "glb"]
+        // martin fork (CHANGES.md §7): do NOT claim gltf/glb by extension. martin loads its splats
+        // from .ply and uses Bevy's NATIVE glTF loader for `model:` meshes (real PBR geometry that
+        // lives alongside the splats). Claiming these extensions here shadowed Bevy's GltfLoader, so
+        // a normal mesh glTF failed to load ("no KHR_gaussian_splatting primitives found"). Upstream
+        // KHR_gaussian_splatting glTF loading via explicit type-load is unaffected; we just don't use it.
+        &[]
     }
 }
 
