@@ -105,6 +105,33 @@ pub struct CloudSettings {
     pub time_scale: f32,
     pub time_start: f32,
     pub time_stop: f32,
+    /// Midpoint explosive-bulge amplitude for GaussianInterpolate morphs (0 = none).
+    /// The renderer scatters each gaussian radially by `sin(pi*t)*bulge` (peaks at the
+    /// blend midpoint, zero at both ends) so a morph blows apart then reassembles.
+    pub bulge: f32,
+    /// Per-particle transition mode (0 = off/identity → byte-identical to upstream).
+    /// Selects a staggered reveal/motion effect in vs_points. See SHADER-BLUEPRINT.md.
+    pub transition_mode: u32,
+    /// Moving-window ramp width for the transition. Small ≈ hard edge (typewriter/wipe),
+    /// larger → soft dissolve. Ignored when transition_mode == 0.
+    pub transition_softness: f32,
+    /// Axis for axis/wipe/vortex transition modes: 0 = x, 1 = y, 2 = z.
+    pub transition_axis: u32,
+    /// Persistent vertex deform (0 = off → byte-identical to upstream): 1 wave, 2 cloth,
+    /// 3 ripple, 4 twist. Unlike the transition it runs *every frame* (driven by `deform_time`),
+    /// so a held shape keeps moving. See gaussian.wgsl / SHADER-BLUEPRINT.md.
+    pub deform_mode: u32,
+    /// Deform displacement amplitude (object units; radians for twist). Ignored when mode == 0.
+    pub deform_amp: f32,
+    /// Deform spatial frequency. Ignored when mode == 0.
+    pub deform_freq: f32,
+    /// Deform animation phase in seconds (the app advances it from the show clock).
+    pub deform_time: f32,
+    /// Per-particle swarm detour during a GaussianInterpolate morph (0 = off → byte-identical to
+    /// upstream). Each gaussian swirls along a pseudo-random + tangential curl by `sin(pi*t)*swarm`
+    /// (peaks mid-morph, zero at both ends), so a shape→shape morph *flocks/swarms* between the two
+    /// scenes instead of lerping straight. See gaussian.wgsl / SHADER-BLUEPRINT.md.
+    pub swarm: f32,
 }
 
 impl Default for CloudSettings {
@@ -127,6 +154,15 @@ impl Default for CloudSettings {
             time_scale: 1.0,
             time_start: 0.0,
             time_stop: 1.0,
+            bulge: 0.0,
+            transition_mode: 0,        // off → byte-identical to upstream
+            transition_softness: 0.15, // sensible ramp; only used when mode != 0
+            transition_axis: 0,        // x
+            deform_mode: 0,            // off → byte-identical to upstream
+            deform_amp: 0.0,
+            deform_freq: 0.0,
+            deform_time: 0.0,
+            swarm: 0.0, // off → byte-identical to upstream
         }
     }
 }
