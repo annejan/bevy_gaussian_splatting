@@ -19,10 +19,31 @@ struct GaussianUniforms {
     time: f32,
     time_start: f32,
     time_stop: f32,
+    bulge: f32,
     num_classes: u32,
     color_space: u32,
     min: vec4<f32>,
     max: vec4<f32>,
+    // --- per-particle transition phase (martin fork; default-off, append-only). Appended
+    //     AFTER max (the true struct end) so no existing field offset moves. ---
+    transition_mode: u32,        // 0 = identity/off (byte-identical to upstream)
+    transition_softness: f32,    // moving-window ramp width (small = hard edge)
+    transition_axis: u32,        // 0 = x, 1 = y, 2 = z (axis/wipe/vortex modes)
+    _transition_pad: u32,        // std140: complete the 16-byte tail block
+    // --- persistent vertex deform (martin fork; default-off, append-only). A second 16-byte
+    //     block after the transition group, so offsets above are unchanged. Unlike the transition
+    //     it is NOT gated to a morph — driven by deform_time it runs every frame, so a held shape
+    //     (a "wall of text") keeps undulating. ---
+    deform_mode: u32,            // 0 = off; 1 wave, 2 cloth, 3 ripple, 4 twist, 5 wind, 6 turbulence, 7 pulse, 8 jitter, 9 spiral
+    deform_amp: f32,             // displacement amplitude (object units; radians for twist)
+    deform_freq: f32,            // spatial frequency
+    deform_time: f32,            // animation phase (seconds) — completes the 16-byte block
+    // --- swarm: a per-particle swirling detour during a morph (martin fork; append-only 16-byte
+    //     block, so every offset above is unchanged; 0 = off → byte-identical to upstream). ---
+    swarm: f32,                  // turbulence amplitude (object-radius units) at the morph midpoint
+    _swarm_pad0: f32,
+    _swarm_pad1: f32,
+    _swarm_pad2: f32,
 };
 @group(1) @binding(0) var<uniform> gaussian_uniforms: GaussianUniforms;
 
