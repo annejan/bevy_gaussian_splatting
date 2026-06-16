@@ -217,6 +217,7 @@ fn transition_phase(index: u32, position: vec3<f32>) -> f32 {
     else if (mode == 5u) { return radial; }                      // vortex-true (unwind by radius)
     else if (mode == 6u) { return clamp(norm_axis, 0.0, 1.0); }  // directional-wipe HARD
     else if (mode == 7u) { return clamp(position.z, 0.0, 1.0); } // pen-write (baked z; see blueprint §9)
+    else if (mode == 8u) { return radial; }                      // shockwave (reveal by radius from centre)
     return 0.0;
 }
 
@@ -323,8 +324,8 @@ fn vs_points(
         var phase = transition_phase(splat_index, position.xyz);
         if (mode == 7u) { phase = get_visibility(splat_index); }
         let local = clamp((gt * (1.0 + softness) - phase) / softness, 0.0, 1.0);
-        if (mode == 1u || mode == 6u) {
-            tx_reveal = local;                  // typewriter / directional-wipe HARD
+        if (mode == 1u || mode == 6u || mode == 8u) {
+            tx_reveal = local;                  // typewriter / directional-wipe HARD / shockwave (radial blast-front)
         } else if (mode == 2u) {
             // slither: lateral sine that dies as the particle settles (local -> 1).
             let amp = (1.0 - local) * length(gaussian_uniforms.max.xyz - gaussian_uniforms.min.xyz) * 0.04;
