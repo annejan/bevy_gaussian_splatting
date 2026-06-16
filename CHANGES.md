@@ -67,9 +67,15 @@ positions → no holes). **Opened upstream as mosure/bevy_gaussian_splatting#229
 ## 4. Per-particle transition phase  (`gaussian.wgsl` + 4 uniform spots — opt-in, default-off)
 
 Enables staggered *per-particle* transitions a single global `time` can't express
-(typewriter, slither, sparkle, true vortex, hard wipe). **`transition_mode == 0` is the
+(typewriter, slither, sparkle, true vortex, hard wipe, **shockwave**). **`transition_mode == 0` is the
 default and is byte-identical to upstream.** Append-only + default-off ⇒ a clean candidate to
 **upstream as a PR**. Full reference: `SHADER-BLUEPRINT.md` in the martin repo.
+
+Modes: 1 typewriter · 2 slither · 3 sparkle-in · 4 spark-out · 5 vortex · 6 directional-wipe ·
+7 pen-write · **8 shockwave** (phase = `radial` distance from the centre → an expanding blast-front
+reveal, so a shape materialises as a ring sweeping outward instead of a uniform converge). Adding a
+mode = one `transition_phase` arm + one `tx_reveal`/position arm; mode 8 reuses the existing `radial`
+and the `tx_reveal = local` opacity sink (no new math, no new uniform).
 
 - `src/render/gaussian.wgsl` — `transition_phase(index, position) -> f32` helper (after
   `explode_hash3`); a gated branch in `vs_points` (after the ball-pulse) computing a moving
