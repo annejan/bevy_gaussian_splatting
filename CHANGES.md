@@ -136,6 +136,23 @@ The effect: a shape→shape morph *flocks/swarms* between the two scenes instead
 the camera + the depth test, so they composite). Changed `extensions()` to return `&[]`; the loader
 still exists for explicit type-loads, it just no longer grabs the extension. (One-line, reversible.)
 
+## 8. Staggered morph timing  (`morph/interpolate.wgsl` + 1 uniform spot — opt-in, default-off)
+
+`morph_stagger: f32` (0 = off → byte-identical). The interpolate compute shader lerped every gaussian
+with one global blend factor `t`, so a morph slid the whole cloud as a synchronized block — which reads
+as straight-line **streaks**. With stagger > 0, each gaussian morphs over its own sub-window of the
+factor: `offset = hash(index)*stagger`, `width = 1-stagger`, `t_i = smoothstep(clamp((t-offset)/width))`.
+Early-offset splats arrive while late ones haven't left, so the cloud **dissolves + reforms** instead of
+sliding (a soft "cloudy" transition). `stagger == 0` short-circuits to the plain global `t` → identical
+to upstream. Endpoints stay exact (t=0 → all at lhs, t=1 → all at rhs).
+
+- Reuses the §6 swarm group's first pad slot — `_swarm_pad0` → `morph_stagger` in `bindings.wgsl`,
+  `mod.rs` `CloudUniform`, and `settings.rs` `CloudSettings`. **No new 16-byte block, no offset moves.**
+
+> Same sort caveat as §2/§6 (lives in the interpolate pass, invisible to the radix sort); the per-splat
+> timing spread is bounded so the depth-sort error stays small. The app drives it from a show knob
+> (`MARTIN_MORPH_STAGGER` / `.show` `morph_stagger =`).
+
 ---
 
 ## Not a fork edit (for reference)
