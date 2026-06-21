@@ -132,6 +132,12 @@ pub struct CloudSettings {
     /// (peaks mid-morph, zero at both ends), so a shape→shape morph *flocks/swarms* between the two
     /// scenes instead of lerping straight. See gaussian.wgsl / SHADER-BLUEPRINT.md.
     pub swarm: f32,
+    /// Per-particle STAGGERED morph timing (0 = off → synchronized, byte-identical to upstream). Each
+    /// gaussian morphs over its own sub-window `[offset, offset+(1-stagger)]` of the blend factor, with
+    /// `offset = hash(index)*stagger`, so the cloud DISSOLVES + reforms instead of sliding as one block
+    /// (the latter reads as straight-line streaks). ~0.6 = a strong, "cloudy" dissolve. See
+    /// morph/interpolate.wgsl.
+    pub morph_stagger: f32,
 }
 
 impl Default for CloudSettings {
@@ -162,7 +168,8 @@ impl Default for CloudSettings {
             deform_amp: 0.0,
             deform_freq: 0.0,
             deform_time: 0.0,
-            swarm: 0.0, // off → byte-identical to upstream
+            swarm: 0.0,        // off → byte-identical to upstream
+            morph_stagger: 0.0, // off → synchronized, byte-identical to upstream
         }
     }
 }

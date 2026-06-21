@@ -41,7 +41,7 @@ struct GaussianUniforms {
     // --- swarm: a per-particle swirling detour during a morph (martin fork; append-only 16-byte
     //     block, so every offset above is unchanged; 0 = off → byte-identical to upstream). ---
     swarm: f32,                  // turbulence amplitude (object-radius units) at the morph midpoint
-    _swarm_pad0: f32,
+    morph_stagger: f32,          // per-particle staggered morph timing (0 = synchronized); reuses pad0
     _swarm_pad1: f32,
     _swarm_pad2: f32,
 };

@@ -56,6 +56,14 @@ fn interpolation_factor() -> f32 {
     return clamp((gaussian_uniforms.time - gaussian_uniforms.time_start) / duration, 0.0, 1.0);
 }
 
+// Per-splat pseudo-random in [0,1) (PCG-style integer hash) — used to stagger each splat's morph start.
+fn hash_u32(x: u32) -> f32 {
+    var h = x * 747796405u + 2891336453u;
+    h = ((h >> ((h >> 28u) + 4u)) ^ h) * 277803737u;
+    h = (h >> 22u) ^ h;
+    return f32(h) / 4294967295.0;
+}
+
 fn normalize_quaternion(q: vec4<f32>) -> vec4<f32> {
     let length_squared = dot(q, q);
     if length_squared <= 0.0 {
@@ -75,7 +83,19 @@ fn interpolate_gaussians(
         return;
     }
 
-    let t = interpolation_factor();
+    let t_global = interpolation_factor();
+    // Per-splat STAGGERED timing: each splat morphs over its own sub-window [offset, offset+width] of
+    // the global factor, so the cloud DISSOLVES + reforms instead of sliding as one coherent block —
+    // which is what made the morph read as straight-line streaks. Driven by the `morph_stagger` uniform;
+    // stagger 0 short-circuits to the plain global factor → SYNCHRONIZED, byte-identical to upstream.
+    let stagger = clamp(gaussian_uniforms.morph_stagger, 0.0, 0.98);
+    var t = t_global;
+    if stagger > 0.0 {
+        let offset = hash_u32(index) * stagger;
+        let width = max(1.0 - stagger, 1e-3);
+        let tu = clamp((t_global - offset) / width, 0.0, 1.0);
+        t = tu * tu * (3.0 - 2.0 * tu); // smooth per-splat ease
+    }
     let position_t = vec3<f32>(t);
     let rotation_t = vec4<f32>(t);
 
