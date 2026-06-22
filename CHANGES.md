@@ -1,10 +1,16 @@
 # martin branch — change log
 
 This is the **`martin` branch** of `annejan/bevy_gaussian_splatting`: upstream
-**7.0.2** (incl. the #228 `DynamicUniformIndex<CloudUniform>` radix fix) plus the
-edits below. The [martin](https://github.com/annejan/martin) demo engine consumes
-this branch as a git dependency via `[patch.crates-io]` in its `Cargo.toml`
+**7.1.0** (incl. our radix-sort speedup #229 — now merged upstream — plus #228's
+`DynamicUniformIndex<CloudUniform>` fix and the new radix depth-precision controls)
+plus the edits below. The [martin](https://github.com/annejan/martin) demo engine
+consumes this branch as a git dependency via `[patch.crates-io]` in its `Cargo.toml`
 (`Cargo.lock` pins the exact commit).
+
+Rebased 7.0.2 → 7.1.0 on 2026-06-22: §3 (the radix sort speedup) is now UPSTREAM
+(merged as #229), so it is no longer a fork edit — the conflicting radix hunks were
+resolved in favour of upstream (which also gained configurable depth precision on
+top of our change). The remaining edits (§1–2, §4–8) replay cleanly.
 
 This file lists every edit on top of upstream, so the set can be re-applied (or
 dropped) when rebasing onto a new upstream release. Keep it current when you touch
@@ -47,11 +53,12 @@ Drives the ball-pulse amplitude per cloud. `encase`/std140 layout couples these:
 
 > Fragile on upgrade: if upstream changes `CloudUniform`'s field order, re-check alignment.
 
-## 3. Sort optimizations  (`src/sort/radix.{rs,wgsl}`, `src/render/mod.rs`)
+## 3. Sort optimizations  (`src/sort/radix.{rs,wgsl}`, `src/render/mod.rs`) — ✅ MERGED UPSTREAM, NO LONGER A FORK EDIT
 
 ~2.4× faster radix sort on the iGPU, correctness preserved (LSD-stable, reads live GPU
-positions → no holes). **Opened upstream as mosure/bevy_gaussian_splatting#229** (branch
-`perf/radix-sort-2x` on this fork, based on 7.0.2 main).
+positions → no holes). **Merged upstream as mosure/bevy_gaussian_splatting#229** and shipped in
+7.1.0 (upstream then layered configurable depth precision on top). As of the 7.1.0 rebase this is
+upstream code, not a fork edit — kept here only for the historical record. Original notes:
 
 - `render/mod.rs` `ShaderDefines::default()` — `radix_digit_places = 2` (was `32/bits` = 4):
   16-bit depth key → halves the radix C-pass cost (65536 buckets is ample).
