@@ -1,11 +1,15 @@
 # martin branch — change log
 
 This is the **`martin` branch** of `annejan/bevy_gaussian_splatting`: upstream
-**7.1.0** (incl. our radix-sort speedup #229 — now merged upstream — plus #228's
-`DynamicUniformIndex<CloudUniform>` fix and the new radix depth-precision controls)
-plus the edits below. The [martin](https://github.com/annejan/martin) demo engine
-consumes this branch as a git dependency via `[patch.crates-io]` in its `Cargo.toml`
-(`Cargo.lock` pins the exact commit).
+**8.0.0 (Bevy 0.19)** plus the edits below. The [martin](https://github.com/annejan/martin)
+demo engine consumes this branch as a git dependency via `[patch.crates-io]` in its
+`Cargo.toml` (`Cargo.lock` pins the exact commit).
+
+Rebased 7.1.0 → 8.0.0 (Bevy 0.18 → **0.19**) on 2026-06-25: upstream's #230 (Bevy 0.19)
++ #235 landed; all four of our edit commits replayed onto upstream/main with **zero
+conflicts** — the edits are WGSL shaders (`gaussian.wgsl`/`bindings.wgsl`/`interpolate.wgsl`,
+version-independent) plus small additive Rust hunks in `settings.rs`/`io/scene.rs`/
+`render/mod.rs` that 0.19 didn't touch.
 
 Rebased 7.0.2 → 7.1.0 on 2026-06-22: §3 (the radix sort speedup) is now UPSTREAM
 (merged as #229), so it is no longer a fork edit — the conflicting radix hunks were
