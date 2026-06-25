@@ -452,14 +452,25 @@ fn vs_points(
 
     var opacity = get_opacity(splat_index);
 
-// martin §9: tighten the splat quad from 3.0σ to 2.4σ. The 2.4-3σ ring is near-zero-alpha
-// (exp(-0.5·2.4²)≈5.6% of peak, ×opacity) — rasterized + blended for almost nothing. Clamping it
-// cuts the quad PIXEL AREA by ~(2.4/3)²≈36% (a big fill win on an overdraw-bound iGPU) with no visible
-// change, and — unlike SPLAT_SCALE — it does NOT shrink the gaussians (no thinning/gaps). 9.0=3², 5.76=2.4².
+// martin §9: tighten the splat quad 3.0σ → 2.4σ for SYNTHETIC content only (SH_DEGREE 0). The 2.4-3σ
+// ring is near-zero alpha (exp(-0.5·2.4²)≈5.6% of peak, ×opacity) — rasterized + blended for almost
+// nothing — so trimming it cuts the quad PIXEL AREA ~(2.4/3)²≈36% with no visible change, and — unlike
+// SPLAT_SCALE — does NOT shrink the gaussians (no thinning/gaps). REAL CAPTURES (SH_DEGREE>0, the sh3
+// build) KEEP the upstream 3.0σ: anisotropic photogrammetry splats lean on the wider tails for smooth
+// inter-splat blending, so they must not be clipped. Gated at compile time → default(sh3)==upstream.
+// 9.0=3², 5.76=2.4².
+#if SH_DEGREE > 0
+#ifdef OPACITY_ADAPTIVE_RADIUS
+    let cutoff = sqrt(max(9.0 + 2.0 * log(opacity), 0.000001));
+#else
+    let cutoff = 3.0;
+#endif
+#else
 #ifdef OPACITY_ADAPTIVE_RADIUS
     let cutoff = sqrt(max(5.76 + 2.0 * log(opacity), 0.000001));
 #else
     let cutoff = 2.4;
+#endif
 #endif
 
 #ifdef GAUSSIAN_2D
