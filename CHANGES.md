@@ -164,6 +164,23 @@ to upstream. Endpoints stay exact (t=0 → all at lhs, t=1 → all at rhs).
 > timing spread is bounded so the depth-sort error stays small. The app drives it from a show knob
 > (`MARTIN_MORPH_STAGGER` / `.show` `morph_stagger =`).
 
+## 9. Tighter splat-quad extent — 3.0σ → 2.4σ  (`render/gaussian.wgsl`, 2 lines)
+
+A fill-rate win for overdraw-bound GPUs. The vertex shader sizes each splat's quad to a `cutoff`-σ
+radius: `sqrt(9.0 + 2·log(opacity))` (= **3.0σ** at full opacity; `9.0 = 3²`) with `OPACITY_ADAPTIVE_RADIUS`,
+else a flat `3.0`. The 2.4–3.0σ ring is near-zero alpha — `exp(-0.5·2.4²) ≈ 5.6 %` of peak, ×opacity —
+so it's rasterised + alpha-blended for almost nothing. Tightening the constant to **2.4σ**
+(`9.0 → 5.76 = 2.4²`, flat `3.0 → 2.4`) cuts the quad **pixel area ~(2.4/3)² ≈ 36 %**.
+
+- Measured on the martin "PonyCamp" stage (AMD 860M iGPU): climax **720p 30→40 fps (+32 %)**, 854×480
+  44.6→54.4. No visible change (A/B on text + props + fire — the trimmed ring was invisible). Unlike
+  shrinking `global_scale`, it does **not** shrink the gaussians, so no thinning/gaps.
+- 2.2σ (`4.84`) was also clean and ~+10 % more, but 2.4σ keeps a safety margin on full-opacity splats
+  (text/brand). Always-on (no uniform/flag) — a pure rasterisation-cost win, endpoints pixel-identical.
+
+> No sort interaction (vertex-stage quad size only). The fragment-side ellipse test (`gaussian_2d.wgsl`)
+> uses the same `cutoff`, so the discard boundary tightens consistently — no half-drawn splats.
+
 ---
 
 ## Not a fork edit (for reference)
