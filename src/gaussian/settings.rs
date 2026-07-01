@@ -138,6 +138,12 @@ pub struct CloudSettings {
     /// (the latter reads as straight-line streaks). ~0.6 = a strong, "cloudy" dissolve. See
     /// morph/interpolate.wgsl.
     pub morph_stagger: f32,
+    /// Additive/emissive blend (false = premultiplied alpha-over → byte-identical to upstream). When
+    /// true the cloud composites One+One (light ACCUMULATES) so overlapping translucent gaussians GLOW
+    /// on black instead of alpha-saturating to a solid blob — the demoscene nebula/neon look. Meant for
+    /// glow content on a dark background; solid captures (real scenes) should stay false (additive has
+    /// no occlusion — everything shows through everything).
+    pub additive: bool,
 }
 
 impl Default for CloudSettings {
@@ -170,6 +176,7 @@ impl Default for CloudSettings {
             deform_time: 0.0,
             swarm: 0.0,        // off → byte-identical to upstream
             morph_stagger: 0.0, // off → synchronized, byte-identical to upstream
+            additive: false,    // off → premultiplied alpha-over, byte-identical to upstream
         }
     }
 }
