@@ -189,6 +189,31 @@ default (sh3/captures) == upstream behaviour; only the synthetic sh0 build opts 
 
 ---
 
+## 10. Additive/emissive blend mode  (`gaussian/settings.rs` + `render/mod.rs` — opt-in, default-off)
+
+A per-cloud `CloudSettings.additive: bool` (default `false` → **byte-identical** to upstream). When
+`true`, the render pipeline composites with `One + One` (add) instead of `PREMULTIPLIED_ALPHA_BLENDING`:
+overlapping (premultiplied) fragments **accumulate light** rather than alpha-over-saturating, so a cloud
+of translucent gaussians **glows** on a dark background — the demoscene nebula/neon look — instead of
+reading as a solid opaque blob. There is no occlusion in additive mode (everything shows through), so
+it's meant for glow content on black; solid captures should stay `false`.
+
+Wiring (3 spots, all additive, no behaviour change when off):
+- `CloudSettings` gains `pub additive: bool` (+ `false` in `Default`).
+- `CloudPipelineKey` gains `pub additive: bool` — so the two blend variants specialize to distinct
+  pipelines (blend is fixed-function pipeline state, not shader-selectable).
+- `specialize()` picks the `BlendState` on `key.additive`; the render-queue key reads `settings.additive`.
+  (The compute/interpolate key uses `..Default::default()` → `false`; blend is irrelevant to a compute pass.)
+
+A/B on the procedural `galaxy` (martin, 120k splats, on black + bloom): alpha-over rendered a flat muddy
+opaque disk; additive rendered a glowing spiral with visible arms + a white-hot core. Consumed by martin
+via `MARTIN_ADDITIVE` / a `.show [settings] additive = 1`.
+
+> For a future upstream PR: `additive` could generalise to a `blend_mode` enum (AlphaOver | Additive |
+> …) on `CloudSettings`, same specialization pattern.
+
+---
+
 ## Not a fork edit (for reference)
 - `sh0` vs `sh3`: feature selection in martin's `Cargo.toml`.
 - `assets/font.ttf`, `build_text_gaussians`, the `GaussianInterpolate` morph, the
