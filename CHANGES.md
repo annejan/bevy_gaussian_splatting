@@ -214,6 +214,17 @@ via `MARTIN_ADDITIVE` / a `.show [settings] additive = 1`.
 
 ---
 
+## 11. `feature(lazy_type_alias)` → `feature(checked_type_aliases)`  (`src/lib.rs` line 2 — nightly rename)
+
+rust-lang/rust#158758 **renamed** the `lazy_type_alias` feature gate to `checked_type_aliases`;
+nightlies from ≈2026-07-19 on reject the old name with E0557 ("feature has been removed … renamed"),
+which breaks the crate's `nightly_generic_alias` feature (and thus martin's pinned-nightly bumps).
+One-word change in the `cfg_attr`. Note this makes the branch require a **new** nightly — older
+nightlies (< the rename) don't know `checked_type_aliases` and fail with E0635. martin's
+`rust-toolchain.toml` pin moves in lockstep. Upstream (mosure) will need the same fix.
+
+---
+
 ## Not a fork edit (for reference)
 - `sh0` vs `sh3`: feature selection in martin's `Cargo.toml`.
 - `assets/font.ttf`, `build_text_gaussians`, the `GaussianInterpolate` morph, the
