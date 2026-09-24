@@ -1,9 +1,15 @@
 # martin branch — change log
 
 This is the **`martin` branch** of `annejan/bevy_gaussian_splatting`: upstream
-**8.0.0 (Bevy 0.19)** plus the edits below. The [martin](https://github.com/annejan/martin)
+**8.0.2 (Bevy 0.19)** plus the edits below. The [martin](https://github.com/annejan/martin)
 demo engine consumes this branch as a git dependency via `[patch.crates-io]` in its
 `Cargo.toml` (`Cargo.lock` pins the exact commit).
+
+Rebased 8.0.1 → 8.0.2 on 2026-09-24: §10 (the additive/emissive blend mode) is now UPSTREAM
+(merged as #238, the same wiring) — its code hunks were resolved in favour of upstream, so §10 below
+is kept for the record only and is no longer a fork edit. The only other conflict was append-only
+(upstream's `additive` field vs our §1–7 `CloudSettings` fields, both appended at the struct end):
+kept both. The remaining edits replay unchanged; martin's API surface is identical.
 
 Rebased 7.1.0 → 8.0.0 (Bevy 0.18 → **0.19**) on 2026-06-25: upstream's #230 (Bevy 0.19)
 + #235 landed; all four of our edit commits replayed onto upstream/main with **zero
@@ -190,6 +196,8 @@ default (sh3/captures) == upstream behaviour; only the synthetic sh0 build opts 
 ---
 
 ## 10. Additive/emissive blend mode  (`gaussian/settings.rs` + `render/mod.rs` — opt-in, default-off)
+
+> **Now upstream** (#238, in 8.0.2) — no longer a fork edit; kept for the record.
 
 A per-cloud `CloudSettings.additive: bool` (default `false` → **byte-identical** to upstream). When
 `true`, the render pipeline composites with `One + One` (add) instead of `PREMULTIPLIED_ALPHA_BLENDING`:
