@@ -5,6 +5,13 @@ This is the **`martin` branch** of `annejan/bevy_gaussian_splatting`: upstream
 demo engine consumes this branch as a git dependency via `[patch.crates-io]` in its
 `Cargo.toml` (`Cargo.lock` pins the exact commit).
 
+Synced with upstream/main on 2026-09-30 — a **merge** this time, not a rebase (fork PR annejan/bevy_gaussian_splatting#3, same change as
+annejan/bevy_gaussian_splatting#2 on `main`), so no history was rewritten. Brought in: upstream #239 (`bench.yml` →
+`actions/checkout@v7` / `actions/cache@v6`), `actions/checkout@v7` in the remaining workflows, a
+`cargo update` of `Cargo.lock` (semver-compatible only; `Cargo.toml` untouched), and a
+`clippy::type_complexity` allow on `run_radix_sort` in `src/sort/radix.rs` (upstream's inlined query
+tuple trips `-D warnings`). None of it touches §1–11; still upstream 8.0.2, martin's API unchanged.
+
 Rebased 8.0.1 → 8.0.2 on 2026-09-24: §10 (the additive/emissive blend mode) is now UPSTREAM
 (merged as #238, the same wiring) — its code hunks were resolved in favour of upstream, so §10 below
 is kept for the record only and is no longer a fork edit. The only other conflict was append-only
