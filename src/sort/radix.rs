@@ -612,7 +612,7 @@ pub fn queue_radix_bind_group<R: PlanarSync>(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::type_complexity)]
 fn run_radix_sort<R: PlanarSync>(
     mut render_context: RenderContext,
     pipeline_cache: Res<PipelineCache>,
