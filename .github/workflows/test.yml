@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 120
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup Rust toolchain with caching
       uses: brndnmtthws/rust-action@v1
@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 120
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup Rust toolchain with caching
       uses: brndnmtthws/rust-action@v1
@@ -64,7 +64,7 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup Rust toolchain with caching
       uses: brndnmtthws/rust-action@v1
